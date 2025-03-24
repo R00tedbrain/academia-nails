@@ -35,12 +35,6 @@ services:
       - ./public_html:/var/www/html
     networks:
       - academia_network
-    # Comando personalizado para instalar extensiones PHP requeridas
-    command: >
-      bash -c "
-        docker-php-ext-install mysqli pdo pdo_mysql xml xmlrpc mbstring zip intl opcache exif gd
-        && apache2-foreground
-      "
 
   # PhpMyAdmin para gestionar la base de datos
   phpmyadmin:
