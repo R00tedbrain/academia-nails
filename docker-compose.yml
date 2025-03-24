@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  # Base de datos MySQL
+  db:
+    image: mysql:8.0
+    container_name: academia_nails_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: academia_nails
+      MYSQL_USER: academia_user
+      MYSQL_PASSWORD: academia_password
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - academia_network
+
+  # WordPress
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    container_name: academia_nails_wp
+    restart: always
+    ports:
+      - "8000:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: academia_user
+      WORDPRESS_DB_PASSWORD: academia_password
+      WORDPRESS_DB_NAME: academia_nails
+      WORDPRESS_TABLE_PREFIX: wp_
+    volumes:
+      - ./public_html:/var/www/html
+    networks:
+      - academia_network
+    # Comando personalizado para instalar extensiones PHP requeridas
+    command: >
+      bash -c "
+        docker-php-ext-install mysqli pdo pdo_mysql xml xmlrpc mbstring zip intl opcache exif gd
+        && apache2-foreground
+      "
+
+  # PhpMyAdmin para gestionar la base de datos
+  phpmyadmin:
+    depends_on:
+      - db
+    image: phpmyadmin/phpmyadmin
+    container_name: academia_nails_phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: rootpassword
+    networks:
+      - academia_network
+
+networks:
+  academia_network:
+
+volumes:
+  db_data: 
